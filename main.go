@@ -14,6 +14,7 @@ import (
 const (
 	IdempotenceHeader = "Idempotence-Key"
 	KeyExpireTime     = 60 * 60 * 24 // 1day
+	LockExpireTime    = 10 * time.Second
 )
 
 var (
@@ -125,7 +126,7 @@ func newRedisPool(address string) *redis.Pool {
 }
 
 func runWithLock(resource string, f func() error) error {
-	lock := rSync.NewMutex(resource, redsync.SetExpiry(10*time.Second))
+	lock := rSync.NewMutex(resource, redsync.SetExpiry(LockExpireTime))
 	if err := lock.Lock(); err != nil {
 		return err
 	}
